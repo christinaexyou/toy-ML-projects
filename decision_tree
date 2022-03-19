@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Mar 19 16:59:53 2022
+
+@author: christinaxu
+"""
+# Decision tree for classifying flower species
+import seaborn as sns 
+import pandas as pd 
+iris = sns.load_dataset('iris')
+iris.head()
+
+x = iris.drop(['species'], axis=1)
+y = iris['species']
+
+iris['species'].unique() # 3 possible classes of species
+
+from sklearn.preprocessing import LabelEncoder 
+dummies = LabelEncoder()
+y = dummies.fit_transform(iris['species'].values)
+
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.3,random_state=1, stratify=y)
+# 30% of the data is used for testing
+# random state ensures that others can reproduce my outputs
+# stratify - data is split according to class labels 
+x_train.head()
+
+# Standardizing the data
+from sklearn.preprocessing import StandardScaler
+ss = StandardScaler()
+x_mean_std = ss.fit(x_train)
+x_train_std = ss.transform(x_train)
+x_test_std = ss.transform(x_test)
+
+# Decision Tree
+from sklearn.tree import DecisionTreeClassifier
+clf = DecisionTreeClassifier(max_depth=3, random_state=1)
+# gini - calculates the prob of a specific feature being classified incorrectly when selected randomly
+clf.fit(x_train,y_train)
+y_train_pred = clf.predict(x_train)
+y_test_pred = clf.predict(x_test)
+
+from sklearn import tree
+tree.plot_tree(clf.fit(x_train,y_train))
+
+# Accuracy score 
+from sklearn import metrics 
+print(metrics.accuracy_score(y_train, y_train_pred))
+print(metrics.accuracy_score(y_test, y_test_pred))
+
+# Confusion matrix 
+print(metrics.confusion_matrix(y_test, y_test_pred))
+
+# Decision tree graphic
+from pydotplus import graph_from_dot_data
+from sklearn.tree import export_graphviz
+dot_data = export_graphviz(clf,filled=True,rounded=True,
+                           class_names=['Setosa', 'Versicolor', 'Virginica'],
+                           feature_names=['sepal length', 'sepal width', 
+                                          'petal length','petal width'],
+                           out_file=None)
+
+graph = graph_from_dot_data(dot_data)
+graph.write_png('tree.png')
+
+from IPython.display import Image
+Image(graph.create_png())
