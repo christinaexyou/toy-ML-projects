@@ -53,17 +53,3 @@ print(metrics.accuracy_score(y_test, y_test_pred))
 # Confusion matrix 
 print(metrics.confusion_matrix(y_test, y_test_pred))
 
-# Decision tree graphic
-from pydotplus import graph_from_dot_data
-from sklearn.tree import export_graphviz
-dot_data = export_graphviz(clf,filled=True,rounded=True,
-                           class_names=['Setosa', 'Versicolor', 'Virginica'],
-                           feature_names=['sepal length', 'sepal width', 
-                                          'petal length','petal width'],
-                           out_file=None)
-
-graph = graph_from_dot_data(dot_data)
-graph.write_png('tree.png')
-
-from IPython.display import Image
-Image(graph.create_png())
