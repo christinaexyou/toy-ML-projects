@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 31 21:27:56 2022
+
+@author: christinaxu
+"""
+
+# Logistic regression for classifying flower species
+# Recall lr is a supervised learning model
+import seaborn as sns
+iris = sns.load_dataset('iris')
+
+x = iris.drop('species', axis=1)
+y = iris['species']
+
+from sklearn.preprocessing import LabelEncoder
+dummies = LabelEncoder()
+y = dummies.fit_transform(iris['species'].values)
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.3,
+                                                    random_state=1,stratify=y)
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+sc.fit(x_train)
+x_train_std = sc.transform(x_train)
+x_test_std = sc.transform(x_test)
+
+# Logistic regression
+from sklearn.linear_model import LogisticRegression
+logit = LogisticRegression(C=1e2, random_state=1)
+# C-complexity penalty
+# if high C, give large weight to training data
+# if low C, give small weoght to training data
+logit.fit(x_train_std, y_train)
+y_train_pred = logit.predict(x_train_std)
+y_test_pred = logit.predict(x_test_std)
+
+# Accuracy score
+from sklearn.metrics import accuracy_score
+print(accuracy_score(y_test, y_test_pred))
+print(accuracy_score(y_train, y_train_pred))
+
+# Confusion matrix
+from sklearn.metrics import confusion_matrix
+print(confusion_matrix(y_test, y_test_pred))
