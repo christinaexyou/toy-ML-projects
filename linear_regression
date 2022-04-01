@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 31 21:28:43 2022
+
+@author: christinaxu
+"""
+
+# Linear regression for predicting when alarm clock will ring
+import pandas as pd
+url = "https://raw.githubusercontent.com/gallettilance/CS506-Fall2021/master/10-regression/data.csv"
+data = pd.read_csv(url, parse_dates=[1])
+
+def get_sec(time):
+    "Get seconds from time"
+    h, m, s = time.split(':')
+    return int(h)*3600 + int(m)*60 + int(s)
+
+# Converting time into seconds
+data['alarm (%H:%M:%S)'] = data['alarm (%H:%M:%S)'].apply(lambda x: get_sec(x))
+
+# Let x = day and y = alarm time 
+data=data.rename(columns={'day':'x', 'alarm (%H:%M:%S)':'y'})
+
+# Diagnostics
+data.describe()
+
+# Calcuting mean of X and Y
+import numpy as np
+xbar = np.mean(data['x'])
+ybar = np.mean(data['y'])
+
+# Calculating terms needed for beta1 and beta0
+SXY = (data['x']-xbar)*(data['y']-ybar)
+SXX = (data['x']-xbar)**2
+
+beta1 = SXY.sum()/SXX.sum()
+beta0 = ybar - beta1*xbar  
+print(f'beta1 = {beta1}')
+print(f'beta0 = {beta0}')
+
+yhat = beta0 + beta1*data['x']
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(12,6))
+plt.plot(data['x'],yhat) #regression line
+plt.plot(data['x'], data['y'], 'ro') # scatterplot of actual data
+plt.title('Linear Regression of Alarm Time vs Day')
+plt.xlabel('Day')
+plt.ylabel('Alarm Time')
+plt.show()
